@@ -69,12 +69,19 @@ def fc_model():
 
 
 print('\n Loading Datasets. \n')
+# X = np.load('X.npy')
+# y = np.load('y.npy')
+
+# n = y.shape[0]
+# n_class = y.shape[1]
+# width = X.shape[1]
+
 class_index = np.load('class_a.npy').item()
 X = np.load('data.npy')
-
-n = len(X)
+n = X.shape[0]
 n_class = len(class_index)
 width = X.shape[1]
+
 y = np.zeros((n, n_class), dtype=np.uint8)
 
 key = -1
@@ -84,46 +91,53 @@ for class_name, indexes in sorted(class_index.items(), key=lambda x: x[0]):
         y[i][key] = 1
 
 X, y = unison_shuffled_copies(X, y)
-
 dvi = int(X.shape[0] * 0.9)
 x_train = X[:dvi, :, :, :]
 y_train = y[:dvi, :]
 x_val = X[dvi:, :, :, :]
 y_val = y[dvi:, :]
 
+
+n = y.shape[0]
+n_class = y.shape[1]
+width = X.shape[1]
 # Fine-tune the model
 print(' Build model. \n')
 
-batch_sizes = {"Xception": 8, "InceptionResNetV2": 4, "NASNet": 4}
-angles = {"Xception": 20, "InceptionResNetV2": 20, "NASNet": 30}
+batch_sizes = {"MobileNet": 32, "Xception": 8,
+               "InceptionResNetV2": 4, "NASNet": 4}
+angles = {'MobileNet': 40, "Xception": 40,
+          "InceptionResNetV2": 40, "NASNet": 40}
 list_model = {
+    "MobileNet": MobileNet,
     "Xception": Xception,
     "InceptionResNetV2": InceptionResNetV2,
     "NASNet": NASNetLarge
 }
 # model_names = ["Xception"]
 # for model_name in model_names:
-model_name = "Xception"
+model_name = "MobileNet"
 MODEL = list_model[model_name]
 batch_size = batch_sizes[model_name]
-
 use_imagenet = False
-if use_imagenet == True:
-    optimizer = 'SGD'
-    weights = 'imagenet'
-else:
-    optimizer = 'Adam'
-    weights = None
-lr = 5e-4  # 1-5e4
+weights = None
+
 epoch = 1e4
 reduce_lr_patience = 3  # 1-3
-patience = 7  # reduce_lr_patience+1* + 1
+patience = 10  # reduce_lr_patience+1* + 1
 angle = angles[model_name]
 
-print(" Fine tune " + model_name + ": \n")
+
+optimizer = 'SGD'
+lr = 2e-4
+# optimizer = 'RMSprop'
+# lr = 1e-3
+# optimizer = 'Adam'
+# lr = 1e-3
+
 
 # Build the model
-
+print(" Train " + model_name + ": \n")
 cnn_model = MODEL(
     include_top=False, input_shape=(width, width, 3), weights=weights, pooling='avg')
 inputs = Input((width, width, 3))
@@ -138,8 +152,8 @@ model = Model(inputs=inputs, outputs=x)
 
 # Load weights
 if use_imagenet == True:
-    optimizer = 'SGD'
-    print(' Using imagenet weights. \n')
+    print(" Fine tune " + model_name + ": \n")
+    print('\n Using imagenet weights. \n')
     try:
         model.load_weights('fc_' + model_name + '.h5', by_name=True)
         print('  Load fc_' + model_name + '.h5 successfully.\n')
@@ -149,25 +163,29 @@ if use_imagenet == True:
         model.load_weights('fc_' + model_name + '.h5', by_name=True)
         print(' Load fc_' + model_name + '.h5 successfully.\n')
 
-    print(" Optimizer=" + optimizer + " lr=" + str(lr) + " \n")
+print("\n Optimizer=" + optimizer + " lr=" + str(lr) + " \n")
+if optimizer == "Adam":
+    model.compile(
+        loss='categorical_crossentropy',
+        optimizer='adam',
+        metrics=['accuracy'])
+elif optimizer == "SGD":
     model.compile(
         loss='categorical_crossentropy',
         optimizer=SGD(lr=lr, momentum=0.9, nesterov=True),
         metrics=['accuracy'])
-else:
-    optimizer = 'Adam'
-    print(' Not using imagenet weight. \n')
-    print(" Optimizer=" + optimizer + " \n")
+elif optimizer == 'RMSprop':
     model.compile(
         loss='categorical_crossentropy',
-        optimizer=Adam(),
+        optimizer=RMSprop(),
         metrics=['accuracy'])
 
 # datagen and val_datagen
 datagen = ImageDataGenerator(
-    preprocessing_function=preprocess_input,
+    # preprocessing_function=preprocess_input,
     # preprocessing_function=get_random_eraser(
     #     p=0.2, v_l=0, v_h=255, pixel_level=True),  # 0.1-0.4
+    rescale=1. / 255,
     rotation_range=20,  # 10-30
     width_shift_range=0.2,  # 0.1-0.3
     height_shift_range=0.2,  # 0.1-0.3
@@ -175,8 +193,8 @@ datagen = ImageDataGenerator(
     zoom_range=0.2,  # 0.1-0.3
     horizontal_flip=True,
     fill_mode='nearest')
-val_datagen = ImageDataGenerator(preprocessing_function=preprocess_input)
-# val_datagen = ImageDataGenerator()
+# val_datagen = ImageDataGenerator(preprocessing_function=preprocess_input)
+val_datagen = ImageDataGenerator(rescale=1. / 255)
 
 # callbacks
 early_stopping = EarlyStopping(
@@ -184,7 +202,7 @@ early_stopping = EarlyStopping(
 checkpointer = ModelCheckpoint(
     filepath=model_name + '.h5', verbose=0, save_best_only=True)
 reduce_lr = ReduceLROnPlateau(
-    factor=0.3, patience=reduce_lr_patience, verbose=2)
+    factor=0.2, patience=reduce_lr_patience, verbose=2)
 
 # Start fitting model
 print(' Start fitting. \n')

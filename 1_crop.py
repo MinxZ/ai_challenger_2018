@@ -82,23 +82,23 @@ data = []
 labels = []
 # plt.figure(figsize=(20, 20))
 for x in tqdm(range(len(content))):
-    # s_img = cv2.imread(data_path + '/' + content[x][6])
-    # b, g, r = cv2.split(s_img)       # get b,g,r
-    # rgb_img = cv2.merge([r, g, b])     # switch it to rgb
-    # x_1 = int(content[x][2])
-    # x_2 = int(content[x][4])
-    # y_1 = int(content[x][3])
-    # y_2 = int(content[x][5])
-    # crop_img = rgb_img[x_1:x_2, y_1:y_2]
-    # resize_pad_img = resizeAndPad(crop_img, (width, width))
-    # data.append(resize_pad_img)
+    s_img = cv2.imread(data_path + '/' + content[x][6])
+    b, g, r = cv2.split(s_img)       # get b,g,r
+    rgb_img = cv2.merge([r, g, b])     # switch it to rgb
+    x_1 = int(content[x][2])
+    x_2 = int(content[x][4])
+    y_1 = int(content[x][3])
+    y_2 = int(content[x][5])
+    crop_img = rgb_img[x_1:x_2, y_1:y_2]
+    resize_pad_img = resizeAndPad(crop_img, (width, width))
+    data.append(resize_pad_img)
     # cv2.imwrite(
     #     data_path + '/' + content[x][6], resize_pad_img)
     # plt.subplot(row, column, x + 1)
     # plt.imshow(crop_img)
     labels.append(int(content[x][1][-2:]))
-# data = np.array(data)
-# np.save('data', data)
+data = np.array(data)
+np.save('data', data)
 
 class_index = defaultdict(list)
 for i, label in enumerate(labels):
