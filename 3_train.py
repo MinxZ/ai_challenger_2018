@@ -94,7 +94,7 @@ y_val = y[dvi:, :]
 # Fine-tune the model
 print(' Build model. \n')
 
-batch_sizes = {"Xception": 32, "InceptionResNetV2": 16, "NASNet": 16}
+batch_sizes = {"Xception": 8, "InceptionResNetV2": 4, "NASNet": 4}
 angles = {"Xception": 20, "InceptionResNetV2": 20, "NASNet": 30}
 list_model = {
     "Xception": Xception,
@@ -107,6 +107,13 @@ model_name = "Xception"
 MODEL = list_model[model_name]
 batch_size = batch_sizes[model_name]
 
+use_imagenet = False
+if use_imagenet == True:
+    optimizer = 'SGD'
+    weights = 'imagenet'
+else:
+    optimizer = 'Adam'
+    weights = None
 lr = 5e-4  # 1-5e4
 epoch = 1e4
 reduce_lr_patience = 3  # 1-3
@@ -116,13 +123,9 @@ angle = angles[model_name]
 print(" Fine tune " + model_name + ": \n")
 
 # Build the model
-use_imagenet = True
-if use_imagenet == True:
-    cnn_model = MODEL(
-        include_top=False, input_shape=(width, width, 3), weights='imagenet', pooling='avg')
-else:
-    cnn_model = MODEL(
-        include_top=False, input_shape=(width, width, 3), weights=None, pooling='avg')
+
+cnn_model = MODEL(
+    include_top=False, input_shape=(width, width, 3), weights=weights, pooling='avg')
 inputs = Input((width, width, 3))
 x = inputs
 # x = Lambda(preprocess_input, name='preprocessing')(x)
@@ -135,7 +138,8 @@ model = Model(inputs=inputs, outputs=x)
 
 # Load weights
 if use_imagenet == True:
-    print('Using imagenet weights. \n')
+    optimizer = 'SGD'
+    print(' Using imagenet weights. \n')
     try:
         model.load_weights('fc_' + model_name + '.h5', by_name=True)
         print('  Load fc_' + model_name + '.h5 successfully.\n')
@@ -145,14 +149,15 @@ if use_imagenet == True:
         model.load_weights('fc_' + model_name + '.h5', by_name=True)
         print(' Load fc_' + model_name + '.h5 successfully.\n')
 
-    print("  Optimizer=" + optimizer + " lr=" + str(lr) + " \n")
+    print(" Optimizer=" + optimizer + " lr=" + str(lr) + " \n")
     model.compile(
         loss='categorical_crossentropy',
         optimizer=SGD(lr=lr, momentum=0.9, nesterov=True),
         metrics=['accuracy'])
 else:
-    print('Not using imagenet weight. \n')
-    print("  Optimizer=" + optimizer + " \n")
+    optimizer = 'Adam'
+    print(' Not using imagenet weight. \n')
+    print(" Optimizer=" + optimizer + " \n")
     model.compile(
         loss='categorical_crossentropy',
         optimizer=Adam(),
