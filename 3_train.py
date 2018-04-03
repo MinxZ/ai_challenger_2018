@@ -97,119 +97,117 @@ y_train = y[:dvi, :]
 x_val = X[dvi:, :, :, :]
 y_val = y[dvi:, :]
 
-
 n = y.shape[0]
 n_class = y.shape[1]
 width = X.shape[1]
-# Fine-tune the model
-print(' Build model. \n')
 
-batch_sizes = {"MobileNet": 32, "Xception": 8,
-               "InceptionResNetV2": 4, "NASNet": 4}
-angles = {'MobileNet': 40, "Xception": 40,
-          "InceptionResNetV2": 40, "NASNet": 40}
+# Fine-tune the model
+batch_sizes = {"MobileNet": 16, "NASNetMobile": 32, "Xception": 12,
+               "InceptionResNetV2": 10, "NASNetLarge": 6}
 list_model = {
     "MobileNet": MobileNet,
     "Xception": Xception,
     "InceptionResNetV2": InceptionResNetV2,
-    "NASNet": NASNetLarge
+    "NASNetLarge": NASNetLarge,
+    "NASNetMobile": NASNetMobile
 }
-# model_names = ["Xception"]
-# for model_name in model_names:
-model_name = "MobileNet"
-MODEL = list_model[model_name]
-batch_size = batch_sizes[model_name]
 use_imagenet = False
 weights = None
 
 epoch = 1e4
-reduce_lr_patience = 3  # 1-3
-patience = 10  # reduce_lr_patience+1* + 1
-angle = angles[model_name]
+reduce_lr_patience = 15  # 1-3
+patience = 30  # reduce_lr_patience+1* + 1
 
 
 optimizer = 'SGD'
 lr = 2e-4
 # optimizer = 'RMSprop'
-# lr = 1e-3
+# lr = 1e-4
 # optimizer = 'Adam'
-# lr = 1e-3
+# lr = 1e-5
 
+model_names = ["MobileNet", "Xception", "InceptionResNetV2", "NASNetLarge"]
+for model_name in model_names:
+    # model_name = "MobileNet"
+    MODEL = list_model[model_name]
+    batch_size = batch_sizes[model_name]
+    lr = lr * batch_size / 32
 
-# Build the model
-print(" Train " + model_name + ": \n")
-cnn_model = MODEL(
-    include_top=False, input_shape=(width, width, 3), weights=weights, pooling='avg')
-inputs = Input((width, width, 3))
-x = inputs
-# x = Lambda(preprocess_input, name='preprocessing')(x)
-x = cnn_model(x)
-x = Dropout(0.5)(x)
-x = Dense(256, activation='elu', name='fc')(x)
-x = Dropout(0.5)(x)
-x = Dense(n_class, activation='softmax', name='predictions')(x)
-model = Model(inputs=inputs, outputs=x)
+    # Build the model
+    print(f' Build {model_name}. \n')
+    cnn_model = MODEL(
+        include_top=False, input_shape=(width, width, 3), weights=weights, pooling='avg')
+    inputs = Input((width, width, 3))
+    x = inputs
+    # x = Lambda(preprocess_input, name='preprocessing')(x)
+    x = cnn_model(x)
+    x = Dropout(0.5)(x)
+    x = Dense(256, activation='elu', name='fc')(x)
+    x = Dropout(0.5)(x)
+    x = Dense(n_class, activation='softmax', name='predictions')(x)
+    model = Model(inputs=inputs, outputs=x)
 
-# Load weights
-if use_imagenet == True:
-    print(" Fine tune " + model_name + ": \n")
-    print('\n Using imagenet weights. \n')
-    try:
-        model.load_weights('fc_' + model_name + '.h5', by_name=True)
-        print('  Load fc_' + model_name + '.h5 successfully.\n')
-    except:
-        print(' Train fc layer firstly.\n')
-        fc_model()
-        model.load_weights('fc_' + model_name + '.h5', by_name=True)
-        print(' Load fc_' + model_name + '.h5 successfully.\n')
+    # Load weights
+    if use_imagenet == True:
+        print(" Fine tune " + model_name + ": \n")
+        print('\n Using imagenet weights. \n')
+        try:
+            model.load_weights('fc_' + model_name + '.h5', by_name=True)
+            print('  Load fc_' + model_name + '.h5 successfully.\n')
+        except:
+            print(' Train fc layer firstly.\n')
+            fc_model()
+            model.load_weights('fc_' + model_name + '.h5', by_name=True)
+            print(' Load fc_' + model_name + '.h5 successfully.\n')
 
-print("\n Optimizer=" + optimizer + " lr=" + str(lr) + " \n")
-if optimizer == "Adam":
-    model.compile(
-        loss='categorical_crossentropy',
-        optimizer='adam',
-        metrics=['accuracy'])
-elif optimizer == "SGD":
-    model.compile(
-        loss='categorical_crossentropy',
-        optimizer=SGD(lr=lr, momentum=0.9, nesterov=True),
-        metrics=['accuracy'])
-elif optimizer == 'RMSprop':
-    model.compile(
-        loss='categorical_crossentropy',
-        optimizer=RMSprop(),
-        metrics=['accuracy'])
+    print("\n Optimizer=" + optimizer + " lr=" + str(lr) + " \n")
+    if optimizer == "Adam":
+        model.compile(
+            loss='categorical_crossentropy',
+            optimizer=Adam(lr=lr),
+            metrics=['accuracy'])
+    elif optimizer == "SGD":
+        model.compile(
+            loss='categorical_crossentropy',
+            optimizer=SGD(lr=lr, momentum=0.9, nesterov=True),
+            metrics=['accuracy'])
+    elif optimizer == 'RMSprop':
+        model.compile(
+            loss='categorical_crossentropy',
+            optimizer=RMSprop(lr=lr),
+            metrics=['accuracy'])
 
-# datagen and val_datagen
-datagen = ImageDataGenerator(
-    # preprocessing_function=preprocess_input,
-    # preprocessing_function=get_random_eraser(
-    #     p=0.2, v_l=0, v_h=255, pixel_level=True),  # 0.1-0.4
-    rescale=1. / 255,
-    rotation_range=20,  # 10-30
-    width_shift_range=0.2,  # 0.1-0.3
-    height_shift_range=0.2,  # 0.1-0.3
-    shear_range=0.2,  # 0.1-0.3
-    zoom_range=0.2,  # 0.1-0.3
-    horizontal_flip=True,
-    fill_mode='nearest')
-# val_datagen = ImageDataGenerator(preprocessing_function=preprocess_input)
-val_datagen = ImageDataGenerator(rescale=1. / 255)
+    print(f" Train {model_name} with batch size: {batch_size}\n")
+    # datagen and val_datagen
+    datagen = ImageDataGenerator(
+        # preprocessing_function=preprocess_input,
+        # preprocessing_function=get_random_eraser(
+        #     p=0.2, v_l=0, v_h=255, pixel_level=True),  # 0.1-0.4
+        rescale=1. / 255,
+        rotation_range=20,  # 10-30
+        width_shift_range=0.2,  # 0.1-0.3
+        height_shift_range=0.2,  # 0.1-0.3
+        shear_range=0.2,  # 0.1-0.3
+        zoom_range=0.2,  # 0.1-0.3
+        horizontal_flip=True,
+        fill_mode='nearest')
+    # val_datagen = ImageDataGenerator(preprocessing_function=preprocess_input)
+    val_datagen = ImageDataGenerator(rescale=1. / 255)
 
-# callbacks
-early_stopping = EarlyStopping(
-    monitor='val_loss', patience=patience, verbose=2, mode='auto')
-checkpointer = ModelCheckpoint(
-    filepath=model_name + '.h5', verbose=0, save_best_only=True)
-reduce_lr = ReduceLROnPlateau(
-    factor=0.2, patience=reduce_lr_patience, verbose=2)
+    # callbacks
+    early_stopping = EarlyStopping(
+        monitor='val_loss', patience=patience, verbose=2, mode='auto')
+    checkpointer = ModelCheckpoint(
+        filepath=f'{model_name}_{optimizer}_{lr}.h5', verbose=0, save_best_only=True)
+    reduce_lr = ReduceLROnPlateau(
+        factor=0.2, patience=reduce_lr_patience, verbose=2)
 
-# Start fitting model
-print(' Start fitting. \n')
-model.fit_generator(
-    datagen.flow(x_train, y_train, batch_size=batch_size),
-    steps_per_epoch=len(x_train) / batch_size,
-    validation_data=val_datagen.flow(x_val, y_val, batch_size=batch_size),
-    validation_steps=len(x_val) / batch_size,
-    epochs=epoch,
-    callbacks=[early_stopping, checkpointer, reduce_lr])
+    # Start fitting model
+    print(' Start fitting. \n')
+    model.fit_generator(
+        datagen.flow(x_train, y_train, batch_size=batch_size),
+        steps_per_epoch=len(x_train) / batch_size,
+        validation_data=val_datagen.flow(x_val, y_val, batch_size=batch_size),
+        validation_steps=len(x_val) / batch_size,
+        epochs=epoch,
+        callbacks=[early_stopping, checkpointer, reduce_lr])
