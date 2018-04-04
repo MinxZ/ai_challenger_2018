@@ -115,8 +115,8 @@ use_imagenet = False
 weights = None
 
 epoch = 1e4
-reduce_lr_patience = 15  # 1-3
-patience = 30  # reduce_lr_patience+1* + 1
+reduce_lr_patience = 10  # 1-3
+patience = 20  # reduce_lr_patience+1* + 1
 rotation_range = 40
 
 optimizer = 'SGD'
