@@ -102,7 +102,7 @@ n_class = y.shape[1]
 width = X.shape[1]
 
 # Fine-tune the model
-batch_sizes = {"MobileNet": 16, "NASNetMobile": 32, "Xception": 12,
+batch_sizes = {"MobileNet": 24, "NASNetMobile": 32, "Xception": 16,
                "InceptionResNetV2": 10, "NASNetLarge": 6}
 list_model = {
     "MobileNet": MobileNet,
@@ -115,8 +115,8 @@ use_imagenet = False
 weights = None
 
 epoch = 1e4
-reduce_lr_patience = 15  # 1-3
-patience = 30  # reduce_lr_patience+1* + 1
+reduce_lr_patience = 10  # 1-3
+patience = 20  # reduce_lr_patience+1* + 1
 rotation_range = 40
 
 optimizer = 'SGD'
@@ -126,7 +126,7 @@ lr = 2e-4
 # optimizer = 'Adam'
 # lr = 1e-5
 
-model_names = ["MobileNet", "Xception", "InceptionResNetV2", "NASNetLarge"]
+model_names = ["Xception", "NASNetMobile", "InceptionResNetV2", "NASNetLarge"]
 for model_name in model_names:
     # model_name = "MobileNet"
     MODEL = list_model[model_name]
@@ -177,12 +177,12 @@ for model_name in model_names:
             optimizer=RMSprop(lr=lr),
             metrics=['accuracy'])
 
-    print(f" Train {model_name} with batch size: {batch_size}\n")
+    print(f" Train {model_name} with batch size {batch_size}\n")
     # datagen and val_datagen
     datagen = ImageDataGenerator(
         # preprocessing_function=preprocess_input,
-        # preprocessing_function=get_random_eraser(
-        #     p=0.2, v_l=0, v_h=255, pixel_level=True),  # 0.1-0.4
+        preprocessing_function=get_random_eraser(
+            p=0.2, v_l=0, v_h=1, pixel_level=True),  # 0.1-0.4
         rescale=1. / 255,
         rotation_range=rotation_range,  # 10-30
         width_shift_range=0.2,  # 0.1-0.3
