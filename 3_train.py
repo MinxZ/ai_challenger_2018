@@ -117,7 +117,7 @@ weights = None
 epoch = 1e4
 reduce_lr_patience = 15  # 1-3
 patience = 30  # reduce_lr_patience+1* + 1
-
+rotation_range = 40
 
 optimizer = 'SGD'
 lr = 2e-4
@@ -184,7 +184,7 @@ for model_name in model_names:
         # preprocessing_function=get_random_eraser(
         #     p=0.2, v_l=0, v_h=255, pixel_level=True),  # 0.1-0.4
         rescale=1. / 255,
-        rotation_range=20,  # 10-30
+        rotation_range=rotation_range,  # 10-30
         width_shift_range=0.2,  # 0.1-0.3
         height_shift_range=0.2,  # 0.1-0.3
         shear_range=0.2,  # 0.1-0.3
@@ -198,7 +198,7 @@ for model_name in model_names:
     early_stopping = EarlyStopping(
         monitor='val_loss', patience=patience, verbose=2, mode='auto')
     checkpointer = ModelCheckpoint(
-        filepath=f'{model_name}_{optimizer}_{lr}.h5', verbose=0, save_best_only=True)
+        filepath=f'{model_name}_{optimizer}_{lr}_{rotation_range}.h5', verbose=0, save_best_only=True)
     reduce_lr = ReduceLROnPlateau(
         factor=0.2, patience=reduce_lr_patience, verbose=2)
 
