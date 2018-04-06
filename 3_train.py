@@ -211,7 +211,7 @@ for model_name in model_names:
     reduce_lr = ReduceLROnPlateau(
         factor=np.sqrt(0.1), patience=reduce_lr_patience, verbose=2)
 
-    # Start fitting model
+    # Start fitting model.
     print(' Start fitting. \n')
     model.fit_generator(
         datagen.flow(x_train, y_train, batch_size=batch_size),
