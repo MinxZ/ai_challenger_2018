@@ -70,8 +70,7 @@ dic = {'[': '', ']': '', '\n': ''}
 
 # animals_fruits = 'animals'
 animals_fruits = 'fruits'
-dir_path = f'ai_challenger_zsl2018_train_test_a_20180321/zsl_a_{animals_fruits}_train_20180321'
-data_path = f'{dir_path}/zsl_a_{animals_fruits}_train_images_20180321'
+dir_path = f'../ai_challenger_zsl2018_train_test_a_20180321/zsl_a_{animals_fruits}_train_20180321'
 fname = f'{dir_path}/zsl_a_{animals_fruits}_train_annotations_labels_20180321.txt'
 with open(fname) as f:
     content = f.readlines()
@@ -100,9 +99,9 @@ for x in tqdm(range(len(content))):
     #     data_path + '/' + content[x][6], resize_pad_img)
     # plt.subplot(row, column, x + 1)
     # plt.imshow(crop_img)
-    labels.append(int(content[x][1][-2:]))
+    labels.append(content[x][1])
 data = np.array(data)
-np.save('data', data)
+np.save('x_train', data)
 
 class_index = defaultdict(list)
 for i, label in enumerate(labels):

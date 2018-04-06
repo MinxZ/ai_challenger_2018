@@ -115,7 +115,7 @@ list_model = {
 }
 use_imagenet = False
 weights = None
-fine_tune = False
+fine_tune = True
 
 
 reduce_lr_patience = 7  # 1-3
@@ -190,8 +190,8 @@ for model_name in model_names:
     # datagen and val_datagen
     datagen = ImageDataGenerator(
         # preprocessing_function=preprocess_input,
-        preprocessing_function=get_random_eraser(
-            p=0.2, v_l=0, v_h=1, pixel_level=True),  # 0.1-0.4
+        # preprocessing_function=get_random_eraser(
+        #     p=0.2, v_l=0, v_h=1, pixel_level=True),  # 0.1-0.4
         rescale=1. / 255,
         rotation_range=40,  # 10-30
         width_shift_range=0.2,  # 0.1-0.3
