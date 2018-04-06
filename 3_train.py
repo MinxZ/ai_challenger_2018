@@ -18,6 +18,8 @@ from keras.regularizers import *
 from keras.utils.generic_utils import CustomObjectScope
 from tqdm import tqdm
 
+from random_eraser import get_random_eraser
+
 
 def get_features(MODEL, data, batch_size):
     cnn_model = MODEL(input_shape=(width, width, 3),
@@ -113,11 +115,12 @@ list_model = {
 }
 use_imagenet = False
 weights = None
+fine_tune = False
 
-epoch = 1e4
-reduce_lr_patience = 10  # 1-3
-patience = 20  # reduce_lr_patience+1* + 1
-rotation_range = 40
+
+reduce_lr_patience = 7  # 1-3
+patience = 15  # reduce_lr_patience+1* + 1
+print(f' reduce_lr_patience: {reduce_lr_patience} \n patience: {patience} \n ')
 
 optimizer = 'SGD'
 lr = 2e-4
@@ -127,8 +130,9 @@ lr = 2e-4
 # lr = 1e-5
 
 model_names = ["Xception", "NASNetMobile", "InceptionResNetV2", "NASNetLarge"]
+model_names = ["Xception"]
 for model_name in model_names:
-    # model_name = "MobileNet"
+    model_path = f'{model_name}.h5'
     MODEL = list_model[model_name]
     batch_size = batch_sizes[model_name]
     lr = lr * batch_size / 32
@@ -149,18 +153,24 @@ for model_name in model_names:
 
     # Load weights
     if use_imagenet == True:
-        print(" Fine tune " + model_name + ": \n")
+        print(f' Fine tune {model_name}: \n')
         print('\n Using imagenet weights. \n')
         try:
-            model.load_weights('fc_' + model_name + '.h5', by_name=True)
-            print('  Load fc_' + model_name + '.h5 successfully.\n')
+            model.load_weights(f'fc_{model_name}.h5', by_name=True)
+            print(f'  Load fc_{model_name}.h5 successfully.\n')
         except:
             print(' Train fc layer firstly.\n')
             fc_model()
             model.load_weights('fc_' + model_name + '.h5', by_name=True)
-            print(' Load fc_' + model_name + '.h5 successfully.\n')
-
-    print("\n Optimizer=" + optimizer + " lr=" + str(lr) + " \n")
+            print(f'  Load fc_{model_name}.h5 successfully.\n')
+    elif fine_tune == True:
+        model.load_weights(f'{model_name}.h5', by_name=True)
+        lr = lr * 0.2
+        model_path = f'{model_name}_random_eraser.h5'
+        print(f' Fine tune {model_name}: \n')
+    else:
+        print(f" Train {model_name} with batch size {batch_size}\n")
+    print(" Optimizer: " + optimizer + " lr: " + str(lr) + " \n")
     if optimizer == "Adam":
         model.compile(
             loss='categorical_crossentropy',
@@ -177,14 +187,13 @@ for model_name in model_names:
             optimizer=RMSprop(lr=lr),
             metrics=['accuracy'])
 
-    print(f" Train {model_name} with batch size {batch_size}\n")
     # datagen and val_datagen
     datagen = ImageDataGenerator(
         # preprocessing_function=preprocess_input,
         preprocessing_function=get_random_eraser(
             p=0.2, v_l=0, v_h=1, pixel_level=True),  # 0.1-0.4
         rescale=1. / 255,
-        rotation_range=rotation_range,  # 10-30
+        rotation_range=40,  # 10-30
         width_shift_range=0.2,  # 0.1-0.3
         height_shift_range=0.2,  # 0.1-0.3
         shear_range=0.2,  # 0.1-0.3
@@ -198,9 +207,9 @@ for model_name in model_names:
     early_stopping = EarlyStopping(
         monitor='val_loss', patience=patience, verbose=2, mode='auto')
     checkpointer = ModelCheckpoint(
-        filepath=f'{model_name}_{optimizer}_{lr}_{rotation_range}.h5', verbose=0, save_best_only=True)
+        filepath=model_path, verbose=0, save_best_only=True)
     reduce_lr = ReduceLROnPlateau(
-        factor=0.2, patience=reduce_lr_patience, verbose=2)
+        factor=np.sqrt(0.1), patience=reduce_lr_patience, verbose=2)
 
     # Start fitting model
     print(' Start fitting. \n')
@@ -209,5 +218,5 @@ for model_name in model_names:
         steps_per_epoch=len(x_train) / batch_size,
         validation_data=val_datagen.flow(x_val, y_val, batch_size=batch_size),
         validation_steps=len(x_val) / batch_size,
-        epochs=epoch,
+        epochs=1e4,
         callbacks=[early_stopping, checkpointer, reduce_lr])
