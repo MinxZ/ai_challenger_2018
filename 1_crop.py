@@ -68,13 +68,17 @@ def resizeAndPad(img, size, padColor=0):
 
 dic = {'[': '', ']': '', '\n': ''}
 
-fname = 'ai_challenger_zsl2018_train_test_a_20180321/zsl_a_animals_train_20180321/zsl_a_animals_train_annotations_labels_20180321.txt'
+# animals_fruits = 'animals'
+animals_fruits = 'fruits'
+dir_path = f'ai_challenger_zsl2018_train_test_a_20180321/zsl_a_{animals_fruits}_train_20180321'
+data_path = f'{dir_path}/zsl_a_{animals_fruits}_train_images_20180321'
+fname = f'{dir_path}/zsl_a_{animals_fruits}_train_annotations_labels_20180321.txt'
 with open(fname) as f:
     content = f.readlines()
 content = [replace_all(x, dic) for x in content]
 content = [x.split(', ') for x in content]
 
-data_path = 'ai_challenger_zsl2018_train_test_a_20180321/zsl_a_animals_train_20180321/zsl_a_animals_train_images_20180321'
+
 row = 1
 column = 1
 width = 299
