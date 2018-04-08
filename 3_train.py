@@ -129,7 +129,7 @@ lr = 2e-4
 # optimizer = 'Adam'
 # lr = 1e-5
 
-model_names = ["Xception", "NASNetMobile", "InceptionResNetV2", "NASNetLarge"]
+# model_names = ["Xception", "NASNetMobile", "InceptionResNetV2", "NASNetLarge"]
 model_names = ["Xception"]
 for model_name in model_names:
     model_path = f'{model_name}.h5'

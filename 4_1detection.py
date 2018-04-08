@@ -13,7 +13,7 @@ import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
-from matplotlib import pyplot as plt
+# from matplotlib import pyplot as plt
 from PIL import Image
 from tqdm import tqdm
 
@@ -208,18 +208,18 @@ with graph.as_default():
                 # Actual detection.
                 output_dict = run_inference_for_single_image(image_np)
                 # Visualization of the results of a detection.
-                vis_util.visualize_boxes_and_labels_on_image_array(
-                    image_np,
-                    output_dict['detection_boxes'],
-                    output_dict['detection_classes'],
-                    output_dict['detection_scores'],
-                    category_index,
-                    instance_masks=output_dict.get('detection_masks'),
-                    use_normalized_coordinates=True,
-                    line_thickness=8)
+                # vis_util.visualize_boxes_and_labels_on_image_array(
+                #     image_np,
+                #     output_dict['detection_boxes'],
+                #     output_dict['detection_classes'],
+                #     output_dict['detection_scores'],
+                #     category_index,
+                #     instance_masks=output_dict.get('detection_masks'),
+                #     use_normalized_coordinates=True,
+                #     line_thickness=8)
                 # plt.figure(figsize=IMAGE_SIZE)
                 # plt.imshow(image_np)
-                if output_dict['detection_scores'][0] > 0:
+                if output_dict['detection_scores'][0] > 0.5:
                     y_min, x_min, y_max, x_max = output_dict['detection_boxes'][0]
                     h, w = image_np.shape[:2]
                     y_1 = int(x_min * w)
@@ -236,4 +236,5 @@ with graph.as_default():
                 # plt.imshow(crop_img)
 
             data = np.array(data)
-            np.save(f'{zl_path}/x_test_{animals_fruits}', data)
+            np.save(
+                f'{zl_path}/{animals_fruits}/x_test_{MODEL_NAME[4:13]}', data)

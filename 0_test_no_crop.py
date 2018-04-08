@@ -1,22 +1,17 @@
-from __future__ import absolute_import, division, print_function
-
+import glob
 import multiprocessing as mp
+import os
 import random
+import sys
+import tarfile
+import zipfile
 from collections import defaultdict
+from io import StringIO
 
 import cv2
-import matplotlib.image as mpimg
-import matplotlib.pyplot as plt
 import numpy as np
+import tensorflow as tf
 from tqdm import tqdm
-
-# %pylab inline
-
-
-def replace_all(text, dic):
-    for i, j in dic.items():
-        text = text.replace(i, j)
-    return text
 
 
 def resizeAndPad(img, size, padColor=255):
@@ -66,47 +61,23 @@ def resizeAndPad(img, size, padColor=255):
     return scaled_img
 
 
-dic = {'[': '', ']': '', '\n': ''}
-
-# animals_fruits = 'animals'
-animals_fruits = 'fruits'
-for animals_fruits in ['animals', 'fruits']:
+animals_fruits_list = ['animals']
+for animals_fruits in animals_fruits_list:
     zl_path = '/data/zl'
-    dir_path = f'{zl_path}/ai_challenger_zsl2018_train_test_a_20180321/zsl_a_{animals_fruits}_train_20180321'
-    fname = f'{dir_path}/zsl_a_{animals_fruits}_train_annotations_labels_20180321.txt'
-    data_path = f'{dir_path}/zsl_a_{animals_fruits}_train_images_20180321'
-    with open(fname) as f:
-        content = f.readlines()
-    content = [replace_all(x, dic) for x in content]
-    content = [x.split(', ') for x in content]
-
-    row = 1
-    column = 1
+    dir_path = f'{zl_path}/ai_challenger_zsl2018_train_test_a_20180321/zsl_a_{animals_fruits}_test_20180321'
     width = 299
     data = []
-    labels = []
-    # plt.figure(figsize=(20, 20))
-    for x in tqdm(range(len(content))):
-        s_img = cv2.imread(data_path + '/' + content[x][6])
+    image_list = []
+    for filename in glob.glob(f'{dir_path}/*.jpg'):  # assuming gif
+        image_list.append(filename)
+    TEST_IMAGE_PATHS = image_list
+    for i in tqdm(range(len(TEST_IMAGE_PATHS))):
+        image_path = TEST_IMAGE_PATHS[i]
+        s_img = cv2.imread(image_path)
         b, g, r = cv2.split(s_img)       # get b,g,r
-        rgb_img = cv2.merge([r, g, b])     # switch it to rgb
-        x_1 = int(content[x][2])
-        x_2 = int(content[x][4])
-        y_1 = int(content[x][3])
-        y_2 = int(content[x][5])
-        crop_img = rgb_img[x_1:x_2, y_1:y_2]
-        resize_pad_img = resizeAndPad(crop_img, (width, width))
+        image_np = cv2.merge([r, g, b])     # switch it to rgb
+        resize_pad_img = resizeAndPad(image_np, (width, width))
         data.append(resize_pad_img)
-        # cv2.imwrite(
-        #     data_path + '/' + content[x][6], resize_pad_img)
-        # plt.subplot(row, column, x + 1)
-        # plt.imshow(crop_img)
-        labels.append(content[x][1])
     data = np.array(data)
-    np.save(f'{zl_path}/{animals_fruits}/x_train', data)
-
-    class_index = defaultdict(list)
-    for i, label in enumerate(labels):
-        class_index[label].append(i)
-
-    np.save(f'{zl_path}/{animals_fruits}/class_a', class_index)
+    np.save(
+        f'{zl_path}/{animals_fruits}/x_test', data)
