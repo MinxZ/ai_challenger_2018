@@ -32,6 +32,8 @@ Cite the paper, if you use this code.
 
 from __future__ import absolute_import, division, print_function
 
+import os
+
 import numpy as np
 import sklearn.linear_model as models
 
@@ -46,10 +48,10 @@ def attrstr2list(s):
     return attrlist
 
 
-zl_path = '/data/zl/'
-path = f'{zl_path}ai_challenger_zsl2018_train_test_a_20180321'
+zl_path = '/data/zl'
+path = f'{zl_path}/ai_challenger_zsl2018_train_test_a_20180321'
 superclasses = ['Animals', 'Fruits']
-for dim in [2048, 256, 40]:
+for dim in [256, 40]:
     # Write prediction
     fpred = open(f'pred_{dim}.txt', 'w')
     for superclass in superclasses:
@@ -107,7 +109,7 @@ for dim in [2048, 256, 40]:
         features_test = np.load(
             f'{zl_path}/{animals_fruits}/features_test_{dim}.npy')
         class_index = np.load(
-            f'{zl_path}/{animals_fruits}/class_a_{dim}.npy').item()
+            f'{zl_path}/{animals_fruits}/class_a.npy').item()
 
         # Calculate prototypes (cluster centers)
         features_test = features_test / np.max(abs(features_train))

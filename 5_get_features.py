@@ -23,14 +23,7 @@ def model_load(dim):
     print(f'    Build {model_name}.')
     cnn_model = MODEL(
         include_top=False, input_shape=(width, width, 3), weights=None, pooling='avg')
-    if dim == 2048:
-        inputs = Input((width, width, 3))
-        x = inputs
-        x = Lambda(preprocess_input, name='preprocessing')(x)
-        x = cnn_model(x)
-        model = Model(inputs=inputs, outputs=x)
-        model.load_weights(f'{animals_fruits}/{model_name}.h5', by_name=True)
-    elif dim == 256:
+    if dim == 256:
         inputs = Input((width, width, 3))
         x = inputs
         x = Lambda(preprocess_input, name='preprocessing')(x)
@@ -58,7 +51,7 @@ for animals_fruits in ['animals', 'fruits']:
     for train_test in ['train', 'test']:
         print(f'  {train_test}: ')
             X = np.load(f'{animals_fruits}/x_{train_test}.npy')
-        for dim in [2048, 256, 40]:
+        for dim in [256, 40]:
             print(f'\n    dim: {dim}')
             model = model_load(dim)
             features = model.predict(X, batch_size=batch_size, verbose=1)
