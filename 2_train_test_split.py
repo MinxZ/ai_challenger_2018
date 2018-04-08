@@ -5,7 +5,7 @@ import numpy as np
 
 # Loading Datasets
 print('Loading Datasets. \n')
-X = np.load('data.npy')
+X = np.load('x_train.npy')
 class_index = np.load('class_a.npy').item()
 
 train = []

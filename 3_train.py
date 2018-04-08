@@ -79,7 +79,7 @@ print('\n Loading Datasets. \n')
 # width = X.shape[1]
 
 class_index = np.load('class_a.npy').item()
-X = np.load('data.npy')
+X = np.load('x_train.npy')
 n = X.shape[0]
 n_class = len(class_index)
 width = X.shape[1]

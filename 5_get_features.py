@@ -54,13 +54,10 @@ def model_load(dim):
 
 
 for animals_fruits in ['animals', 'fruits']:
-    print(f'{animals_fruits}: ')
+    print(f'\n {animals_fruits}: ')
     for train_test in ['train', 'test']:
         print(f'  {train_test}: ')
-        if train_test == 'test':
-            X = np.load(f'{animals_fruits}/x_test.npy')
-        else:
-            X = np.load(f'{animals_fruits}/data.npy')
+            X = np.load(f'{animals_fruits}/x_{train_test}.npy')
         for dim in [2048, 256, 40]:
             print(f'\n    dim: {dim}')
             model = model_load(dim)
