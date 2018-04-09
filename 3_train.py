@@ -70,7 +70,6 @@ def fc_model():
         callbacks=[checkpointer, early_stopping])
 
 
-print('\n Loading Datasets. \n')
 # X = np.load('X.npy')
 # y = np.load('y.npy')
 
@@ -78,30 +77,7 @@ print('\n Loading Datasets. \n')
 # n_class = y.shape[1]
 # width = X.shape[1]
 
-class_index = np.load('class_a.npy').item()
-X = np.load('x_train.npy')
-n = X.shape[0]
-n_class = len(class_index)
-width = X.shape[1]
 
-y = np.zeros((n, n_class), dtype=np.uint8)
-
-key = -1
-for class_name, indexes in sorted(class_index.items(), key=lambda x: x[0]):
-    key += 1
-    for i in indexes:
-        y[i][key] = 1
-
-X, y = unison_shuffled_copies(X, y)
-dvi = int(X.shape[0] * 0.9)
-x_train = X[:dvi, :, :, :]
-y_train = y[:dvi, :]
-x_val = X[dvi:, :, :, :]
-y_val = y[dvi:, :]
-
-n = y.shape[0]
-n_class = y.shape[1]
-width = X.shape[1]
 
 # Fine-tune the model
 batch_sizes = {"MobileNet": 24, "NASNetMobile": 32, "Xception": 16,
@@ -123,16 +99,46 @@ patience = 15  # reduce_lr_patience+1* + 1
 print(f' reduce_lr_patience: {reduce_lr_patience} \n patience: {patience} \n ')
 
 optimizer = 'SGD'
-lr = 2e-4
+lr = 1e-4
 # optimizer = 'RMSprop'
 # lr = 1e-4
 # optimizer = 'Adam'
 # lr = 1e-5
 
-# model_names = ["Xception", "NASNetMobile", "InceptionResNetV2", "NASNetLarge"]
-model_names = ["Xception"]
-for model_name in model_names:
-    model_path = f'{model_name}.h5'
+model_name = "Xception"
+zl_path = '/data/zl'
+superclasses = ['Animals', 'Fruits']
+
+for superclass in superclasses:
+    animals_fruits = str(superclass).lower()
+    print(f'Training on {animals_fruits} dataset.')
+    print('\n Loading Datasets. \n')
+    class_index = np.load(f'{zl_path}/{animals_fruits}/class_a.npy').item()
+    X = np.load(f'{zl_path}/{animals_fruits}/x_train.npy')
+    n = X.shape[0]
+    n_class = len(class_index)
+    width = X.shape[1]
+
+    y = np.zeros((n, n_class), dtype=np.uint8)
+
+    key = -1
+    for class_name, indexes in sorted(class_index.items(), key=lambda x: x[0]):
+        key += 1
+        for i in indexes:
+            y[i][key] = 1
+
+    X, y = unison_shuffled_copies(X, y)
+    dvi = int(X.shape[0] * 0.9)
+    x_train = X[:dvi, :, :, :]
+    y_train = y[:dvi, :]
+    x_val = X[dvi:, :, :, :]
+    y_val = y[dvi:, :]
+
+    n = y.shape[0]
+    n_class = y.shape[1]
+    width = X.shape[1]
+
+    model_path = f'{zl_path}/{animals_fruits}/{model_name}.h5'
     MODEL = list_model[model_name]
     batch_size = batch_sizes[model_name]
     lr = lr * batch_size / 32
@@ -156,15 +162,18 @@ for model_name in model_names:
         print(f' Fine tune {model_name}: \n')
         print('\n Using imagenet weights. \n')
         try:
-            model.load_weights(f'fc_{model_name}.h5', by_name=True)
+            model.load_weights(
+                f'{zl_path}/{animals_fruits}/fc_{model_name}.h5', by_name=True)
             print(f'  Load fc_{model_name}.h5 successfully.\n')
         except:
             print(' Train fc layer firstly.\n')
             fc_model()
-            model.load_weights('fc_' + model_name + '.h5', by_name=True)
+            model.load_weights(
+                f'{zl_path}/{animals_fruits}/fc_' + model_name + '.h5', by_name=True)
             print(f'  Load fc_{model_name}.h5 successfully.\n')
     elif fine_tune == True:
-        model.load_weights(f'{model_name}.h5', by_name=True)
+        model.load_weights(
+            f'{zl_path}/{animals_fruits}/{model_name}_best.h5', by_name=True)
         lr = lr * 0.2
         model_path = f'{model_name}_random_eraser.h5'
         print(f' Fine tune {model_name}: \n')

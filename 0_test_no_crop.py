@@ -61,7 +61,7 @@ def resizeAndPad(img, size, padColor=255):
     return scaled_img
 
 
-animals_fruits_list = ['animals']
+animals_fruits_list = ['animals', 'fruits']
 for animals_fruits in animals_fruits_list:
     zl_path = '/data/zl'
     dir_path = f'{zl_path}/ai_challenger_zsl2018_train_test_a_20180321/zsl_a_{animals_fruits}_test_20180321'

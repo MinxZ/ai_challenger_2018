@@ -10,16 +10,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from tqdm import tqdm
 
-# %pylab inline
 
-
-def replace_all(text, dic):
-    for i, j in dic.items():
-        text = text.replace(i, j)
-    return text
-
-
-def resizeAndPad(img, size, padColor=255):
+def resizeAndPad(img, size, padColor=0):
 
     h, w = img.shape[:2]
     sh, sw = size
@@ -66,6 +58,12 @@ def resizeAndPad(img, size, padColor=255):
     return scaled_img
 
 
+def replace_all(text, dic):
+    for i, j in dic.items():
+        text = text.replace(i, j)
+    return text
+
+
 dic = {'[': '', ']': '', '\n': ''}
 
 # animals_fruits = 'animals'
@@ -94,7 +92,8 @@ for animals_fruits in ['animals', 'fruits']:
         x_2 = int(content[x][4])
         y_1 = int(content[x][3])
         y_2 = int(content[x][5])
-        crop_img = rgb_img[x_1:x_2, y_1:y_2]
+        # crop_img = rgb_img[x_1:x_2, y_1:y_2]
+        crop_img = rgb_img
         resize_pad_img = resizeAndPad(crop_img, (width, width))
         data.append(resize_pad_img)
         # cv2.imwrite(
