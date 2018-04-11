@@ -49,10 +49,11 @@ def attrstr2list(s):
 
 
 zl_path = '/data/zl'
-zl_path = '.'
+zl_path = '/Users/z/zl'
 path = f'{zl_path}/ai_challenger_zsl2018_train_test_a_20180321'
 
 superclass = 'Animals'
+superclass = 'Fruits'
 animals_fruits = str(superclass).lower()
 
 # The constants
@@ -126,7 +127,7 @@ for each in lines_attr_name:
 
 # rm attr_animals.txt
 
-fpred = open(f'attr_{animals_fruits}_ch.txt', 'w')
+fpred = open(f'{zl_path}/attr_{animals_fruits}_ch.txt', 'w')
 for label, attrs in sorted(attributes.items(), key=lambda x: x[0]):
     if label in list_train:
         name = list_name[label] + ' ' + list_name_ch[label]
@@ -139,13 +140,13 @@ for label, attrs in sorted(attributes.items(), key=lambda x: x[0]):
     fpred.write('------------------------------------ \n\n')
 fpred.close()
 
-fpred = open(f'attr_{animals_fruits}_en.txt', 'w')
+fpred = open(f'{zl_path}/attr_{animals_fruits}_en.txt', 'w')
 for label, attrs in sorted(attributes.items(), key=lambda x: x[0]):
     if label in list_train:
         name = list_name[label] + ' ' + list_name_ch[label]
     else:
         name = 'test'
-    fpred.write(f'{label} {name}\n')
+    fpred.write(f'{label} {name}\n\n')
     for idx, attr in enumerate(attrs):
         if attr > 0:
             fpred.write(f'{attr} {attributes_names[idx+1]}')

@@ -11,7 +11,7 @@ import numpy as np
 from tqdm import tqdm
 
 
-def resizeAndPad(img, size, padColor=0):
+def resizeAndPad(img, size, padColor=255):
 
     h, w = img.shape[:2]
     sh, sw = size
@@ -67,7 +67,7 @@ def replace_all(text, dic):
 dic = {'[': '', ']': '', '\n': ''}
 
 # animals_fruits = 'animals'
-animals_fruits = 'fruits'
+# animals_fruits = 'fruits'
 for animals_fruits in ['animals', 'fruits']:
     zl_path = '/data/zl'
     dir_path = f'{zl_path}/ai_challenger_zsl2018_train_test_a_20180321/zsl_a_{animals_fruits}_train_20180321'
@@ -102,7 +102,7 @@ for animals_fruits in ['animals', 'fruits']:
         # plt.imshow(crop_img)
         labels.append(content[x][1])
     data = np.array(data)
-    np.save(f'{zl_path}/{animals_fruits}/x_train', data)
+    np.save(f'{zl_path}/{animals_fruits}/X', data)
 
     class_index = defaultdict(list)
     for i, label in enumerate(labels):
