@@ -51,11 +51,13 @@ def attrstr2list(s):
 zl_path = '/data/zl'
 path = f'{zl_path}/ai_challenger_zsl2018_train_test_a_20180321'
 superclasses = ['Animals', 'Fruits']
+superclasses = ['Animals']
 dim = 256
 
 # Write prediction
 fpred_all = open(f'{zl_path}/pred_all.txt', 'w')
 for superclass in superclasses:
+
     fpred = open(f'{zl_path}/pred_{superclass}.txt', 'w')
     animals_fruits = str(superclass).lower()
     # The constants
@@ -133,6 +135,20 @@ for superclass in superclasses:
     for i in range(len(list_test)):
         label = list_test[i]
         attributes_test[i, :] = np.asarray(attributes[label])
+
+# length(prototypes_train - prototypes_train[::-1]) * mask -  = length(attributes_train - attributes_train[::-1])
+
+    # Structure learning
+    LASSO = models.Lasso(alpha=0.01)
+    LASSO.fit(attributes_train, prototypes_train)
+    W = LASSO.coef_
+    w_sum = W.sum(axis=0)
+
+    attributes_test *= np.absolute(w_sum)
+    attributes_train *= np.absolute(w_sum)
+    # threshold = 0
+    # attributes_test *= np.where(w_sum != threshold, 1, 0)
+    # attributes_train *= np.where(w_sum != threshold, 1, 0)
 
     # Structure learning
     LASSO = models.Lasso(alpha=0.01)
