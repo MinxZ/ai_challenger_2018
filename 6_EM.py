@@ -34,8 +34,12 @@ from __future__ import absolute_import, division, print_function
 
 import os
 
+import matplotlib.pyplot as plt
 import numpy as np
 import sklearn.linear_model as models
+from sklearn import datasets
+from sklearn.mixture import GaussianMixture
+from sklearn.model_selection import StratifiedKFold
 
 
 def attrstr2list(s):
@@ -50,13 +54,12 @@ def attrstr2list(s):
 
 zl_path = '/data/zl'
 path = f'{zl_path}/ai_challenger_zsl2018_train_test_a_20180321'
-superclasses = ['Animals']
+superclasses = ['Animals', 'Fruits']
 dim = 256
 
 # Write prediction
 fpred_all = open(f'{zl_path}/pred_all.txt', 'w')
 for superclass in superclasses:
-
     fpred = open(f'{zl_path}/pred_{superclass}.txt', 'w')
     animals_fruits = str(superclass).lower()
     # The constants
@@ -135,34 +138,26 @@ for superclass in superclasses:
         attributes_test[i, :] = np.asarray(attributes[label])
 
     # Structure learning
-    LASSO = models.Lasso(alpha=0.01, max_iter=10000)
-    LASSO.fit(attributes_train, prototypes_train)
+    LASSO = models.Lasso(alpha=0.01)
+    LASSO.fit(attributes_train.transpose(), attributes_test.transpose())
     W = LASSO.coef_
-    w_sum = W.sum(axis=0)
-
-    attributes_test *= w_sum
-    attributes_train *= w_sum
-
-    # Structure learning
-    LASSO = models.Lasso(alpha=0.01, max_iter=10000)
-    LASSO.fit(attributes_train.transpose(),
-              attributes_test.transpose())
-    W = LASSO.coef_
-
     # Image prototype synthesis
     prototypes_test = (
         np.dot(prototypes_train.transpose(), W.transpose())).transpose()
+    n_class = prototypes_test.shape[0]
 
-    # Prediction
+    # EM
+    estimator = GaussianMixture(
+        n_components=n_class, covariance_type='full', max_iter=100, random_state=0, reg_covar=1e-4)
+    estimator.means_init = prototypes_test
+    estimator.fit(features_test)
+    y_train_pred = estimator.predict(features_test)
 
     dir_path = f'{zl_path}/ai_challenger_zsl2018_train_test_a_20180321/zsl_a_{animals_fruits}_test_20180321'
     images_test = os.listdir(dir_path)
     prediction = list()
     for i in range(len(images_test)):
-        temp = np.repeat(np.reshape(
-            (features_test[i, :]), (1, dim_f)), len(list_test), axis=0)
-        distance = np.sum((temp - prototypes_test)**2, axis=1)
-        pos = np.argmin(distance)
+        pos = y_train_pred[i]
         prediction.append(list_test[pos])
 
     for i in range(len(images_test)):

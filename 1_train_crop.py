@@ -92,8 +92,8 @@ for animals_fruits in ['animals', 'fruits']:
         x_2 = int(content[x][4])
         y_1 = int(content[x][3])
         y_2 = int(content[x][5])
-        # crop_img = rgb_img[x_1:x_2, y_1:y_2]
-        crop_img = rgb_img
+        crop_img = rgb_img[x_1:x_2, y_1:y_2]
+        # crop_img = rgb_img
         resize_pad_img = resizeAndPad(crop_img, (width, width))
         data.append(resize_pad_img)
         # cv2.imwrite(

@@ -21,6 +21,8 @@ from tqdm import tqdm
 
 from random_eraser import get_random_eraser
 
+experiment = Experiment(api_key="3GY2iaW8zS8YuHDB8bczErDGG")
+
 
 def get_features(MODEL, data, batch_size):
     cnn_model = MODEL(input_shape=(width, width, 3),
@@ -86,30 +88,27 @@ model_name = "Xception"
 MODEL = list_model[model_name]
 batch_size = batch_sizes[model_name]
 
-use_imagenet = True
+# use_imagenet = True
 fine_tune = False
-# use_imagenet = False
+use_imagenet = False
 # fine_tune = True
 
 
-<<<<<<< HEAD
-=======
 if use_imagenet or fine_tune is True:
     optimizer = 'SGD'
     lr = 1e-4
     lr = lr * batch_size / 32
     opt = SGD(lr=lr, momentum=0.9, decay=1e-6, nesterov=True)
 
->>>>>>> e175d16ce9cdbf3714812d18158c6e86fbad4b59
 reduce_lr_patience = 5
 patience = 10  # reduce_lr_patience+1* + 1
 print(
     f'\n Reduce_lr_patience: {reduce_lr_patience} \n\n Patience: {patience} \n ')
 
 zl_path = '/data/zl'
-# animals_fruits = 'animals'
+animals_fruits = 'animals'
 # animals_fruits = 'fruits'
-animals_fruits = 'fruits_test'
+# animals_fruits = 'fruits_test'
 
 print(f' Training on {animals_fruits} dataset.')
 print('\n Loading Datasets. \n')
@@ -223,11 +222,8 @@ model.compile(
 datagen = ImageDataGenerator(
     # preprocessing_function=preprocess_input,
     rescale=1. / 255,
-<<<<<<< HEAD
     # preprocessing_function=get_random_eraser(
     #     p=0.2, v_l=0, v_h=1, pixel_level=True),  # 0.1-0.4
-=======
->>>>>>> e175d16ce9cdbf3714812d18158c6e86fbad4b59
     rotation_range=40,  # 10-30
     width_shift_range=0.2,  # 0.1-0.3
     height_shift_range=0.2,  # 0.1-0.3

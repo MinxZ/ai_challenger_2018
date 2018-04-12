@@ -50,13 +50,12 @@ def attrstr2list(s):
 
 zl_path = '/data/zl'
 path = f'{zl_path}/ai_challenger_zsl2018_train_test_a_20180321'
-superclasses = ['Animals']
+superclasses = ['Animals', 'Fruits']
 dim = 256
 
 # Write prediction
 fpred_all = open(f'{zl_path}/pred_all.txt', 'w')
 for superclass in superclasses:
-
     fpred = open(f'{zl_path}/pred_{superclass}.txt', 'w')
     animals_fruits = str(superclass).lower()
     # The constants
@@ -134,19 +133,18 @@ for superclass in superclasses:
         label = list_test[i]
         attributes_test[i, :] = np.asarray(attributes[label])
 
-    # Structure learning
-    LASSO = models.Lasso(alpha=0.01, max_iter=10000)
-    LASSO.fit(attributes_train, prototypes_train)
-    W = LASSO.coef_
-    w_sum = W.sum(axis=0)
+    if animals_fruits == 'animals':
+        LASSO = models.Lasso(alpha=0.01, max_iter=10000)
+        LASSO.fit(attributes_train, prototypes_train)
+        W = LASSO.coef_
+        w_sum = W.sum(axis=0)
 
-    attributes_test *= w_sum
-    attributes_train *= w_sum
+        attributes_test *= w_sum
+        attributes_train *= w_sum
 
     # Structure learning
-    LASSO = models.Lasso(alpha=0.01, max_iter=10000)
-    LASSO.fit(attributes_train.transpose(),
-              attributes_test.transpose())
+    LASSO = models.Lasso(alpha=0.01)
+    LASSO.fit(attributes_train.transpose(), attributes_test.transpose())
     W = LASSO.coef_
 
     # Image prototype synthesis
