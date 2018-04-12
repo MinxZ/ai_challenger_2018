@@ -10,6 +10,10 @@ from io import StringIO
 
 import cv2
 import numpy as np
+<<<<<<< HEAD
+=======
+import tensorflow as tf
+>>>>>>> dcbc0cbe647a4dce94b5eb2601e215466d7f0a79
 from keras.utils import np_utils
 from tqdm import tqdm
 
@@ -62,8 +66,12 @@ def resizeAndPad(img, size, padColor=255):
 
 
 zl_path = '/Users/z/zl'
+<<<<<<< HEAD
 fsplit = open(f'{zl_path}/fruits_attr/fruits_test_label.txt',
               'r', encoding='UTF-8')
+=======
+fsplit = open(f'{zl_path}/fruits/fruits_test_label.txt', 'r', encoding='UTF-8')
+>>>>>>> dcbc0cbe647a4dce94b5eb2601e215466d7f0a79
 lines_label = fsplit.readlines()
 fsplit.close()
 list_train = list()
@@ -80,7 +88,11 @@ y = []
 for label, name in sorted(label2name.items(), key=lambda x: x[0]):
     idx += 1
     print(f'{idx} {label} {name}')
+<<<<<<< HEAD
     dir_path = f'{zl_path}/fruits_dataset/{name}'
+=======
+    dir_path = f'{zl_path}/fruits/{name}'
+>>>>>>> dcbc0cbe647a4dce94b5eb2601e215466d7f0a79
     width = 299
     image_list = []
     for filename in glob.glob(f'{dir_path}/*.jpg'):  # assuming gif
@@ -95,5 +107,10 @@ for label, name in sorted(label2name.items(), key=lambda x: x[0]):
         y.append(idx)
 data = np.array(data)
 y = np_utils.to_categorical(y)
+<<<<<<< HEAD
 np.save(f'{zl_path}/fruits_dataset/X', data)
 np.save(f'{zl_path}/fruits_dataset/y', y)
+=======
+np.save(f'{zl_path}/fruits/X', data)
+np.save(f'{zl_path}/fruits/y', y)
+>>>>>>> dcbc0cbe647a4dce94b5eb2601e215466d7f0a79

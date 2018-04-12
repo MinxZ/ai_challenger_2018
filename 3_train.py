@@ -81,11 +81,24 @@ list_model = {
     "NASNetLarge": NASNetLarge,
     "NASNetMobile": NASNetMobile
 }
+<<<<<<< HEAD
+=======
 
 model_name = "Xception"
 MODEL = list_model[model_name]
 batch_size = batch_sizes[model_name]
 
+# use_imagenet = True
+fine_tune = False
+use_imagenet = False
+# fine_tune = True
+>>>>>>> dcbc0cbe647a4dce94b5eb2601e215466d7f0a79
+
+model_name = "Xception"
+MODEL = list_model[model_name]
+batch_size = batch_sizes[model_name]
+
+<<<<<<< HEAD
 use_imagenet = True
 fine_tune = False
 # use_imagenet = False
@@ -103,6 +116,19 @@ patience = 10  # reduce_lr_patience+1* + 1
 print(
     f'\n Reduce_lr_patience: {reduce_lr_patience} \n\n Patience: {patience} \n ')
 
+=======
+if use_imagenet or fine_tune is True:
+    optimizer = 'SGD'
+    lr = 1e-4
+    lr = lr * batch_size / 32
+    opt = SGD(lr=lr, momentum=0.9, decay=1e-6, nesterov=True)
+
+reduce_lr_patience = 5
+patience = 10  # reduce_lr_patience+1* + 1
+print(
+    f'\n Reduce_lr_patience: {reduce_lr_patience} \n\n Patience: {patience} \n ')
+
+>>>>>>> dcbc0cbe647a4dce94b5eb2601e215466d7f0a79
 zl_path = '/data/zl'
 # animals_fruits = 'animals'
 animals_fruits = 'fruits'
@@ -207,10 +233,17 @@ model.compile(
 
 # datagen and val_datagen
 datagen = ImageDataGenerator(
+<<<<<<< HEAD
     # preprocessing_function=preprocess_input,
     # preprocessing_function=get_random_eraser(
     #     p=0.2, v_l=0, v_h=1, pixel_level=True),  # 0.1-0.4
     rescale=1. / 255,
+=======
+    preprocessing_function=preprocess_input,
+    # preprocessing_function=get_random_eraser(
+    #     p=0.2, v_l=0, v_h=1, pixel_level=True),  # 0.1-0.4
+    # rescale=1. / 255,
+>>>>>>> dcbc0cbe647a4dce94b5eb2601e215466d7f0a79
     rotation_range=40,  # 10-30
     width_shift_range=0.2,  # 0.1-0.3
     height_shift_range=0.2,  # 0.1-0.3
@@ -218,8 +251,13 @@ datagen = ImageDataGenerator(
     zoom_range=0.2,  # 0.1-0.3
     horizontal_flip=True,
     fill_mode='nearest')
+<<<<<<< HEAD
 # val_datagen = ImageDataGenerator(preprocessing_function=preprocess_input)
 val_datagen = ImageDataGenerator(rescale=1. / 255)
+=======
+val_datagen = ImageDataGenerator(preprocessing_function=preprocess_input)
+# val_datagen = ImageDataGenerator(rescale=1. / 255)
+>>>>>>> dcbc0cbe647a4dce94b5eb2601e215466d7f0a79
 
 # callbacks
 early_stopping = EarlyStopping(
