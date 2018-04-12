@@ -81,58 +81,26 @@ list_model = {
     "NASNetLarge": NASNetLarge,
     "NASNetMobile": NASNetMobile
 }
-<<<<<<< HEAD
-=======
 
 model_name = "Xception"
 MODEL = list_model[model_name]
 batch_size = batch_sizes[model_name]
 
-# use_imagenet = True
-fine_tune = False
-use_imagenet = False
-# fine_tune = True
->>>>>>> dcbc0cbe647a4dce94b5eb2601e215466d7f0a79
-
-model_name = "Xception"
-MODEL = list_model[model_name]
-batch_size = batch_sizes[model_name]
-
-<<<<<<< HEAD
 use_imagenet = True
 fine_tune = False
 # use_imagenet = False
 # fine_tune = True
 
 
-if use_imagenet or fine_tune is True:
-    optimizer = 'SGD'
-    lr = 1e-4
-    lr = lr * batch_size / 32
-    opt = SGD(lr=lr, momentum=0.9, decay=1e-6, nesterov=True)
-
 reduce_lr_patience = 5
 patience = 10  # reduce_lr_patience+1* + 1
 print(
     f'\n Reduce_lr_patience: {reduce_lr_patience} \n\n Patience: {patience} \n ')
 
-=======
-if use_imagenet or fine_tune is True:
-    optimizer = 'SGD'
-    lr = 1e-4
-    lr = lr * batch_size / 32
-    opt = SGD(lr=lr, momentum=0.9, decay=1e-6, nesterov=True)
-
-reduce_lr_patience = 5
-patience = 10  # reduce_lr_patience+1* + 1
-print(
-    f'\n Reduce_lr_patience: {reduce_lr_patience} \n\n Patience: {patience} \n ')
-
->>>>>>> dcbc0cbe647a4dce94b5eb2601e215466d7f0a79
 zl_path = '/data/zl'
 # animals_fruits = 'animals'
-animals_fruits = 'fruits'
-# animals_fruits = 'fruits_test'
+# animals_fruits = 'fruits'
+animals_fruits = 'fruits_test'
 
 print(f' Training on {animals_fruits} dataset.')
 print('\n Loading Datasets. \n')
@@ -207,22 +175,33 @@ if use_imagenet == True:
         print(' Train fc layer firstly.\n')
         fc_model()
         model.load_weights(
-            f'{zl_path}/{animals_fruits}/fc_' + model_name + '.h5', by_name=True)
+            f'{zl_path}/{animals_fruits}/fc_{model_name}.h5', by_name=True)
         print(f' Load fc_{model_name}.h5 successfully.\n')
         print(f' Fine tune {model_name} with batch size: {batch_size}: \n')
+    optimizer = 'SGD'
+    lr = 1e-4
+    lr = lr * batch_size / 32
+    # lr = lr * 0.2
+    opt = SGD(lr=lr, momentum=0.9, decay=1e-6, nesterov=True)
+    model.save(f'{zl_path}/{animals_fruits}/{model_name}_fc.h5')
 
 elif fine_tune == True:
     model.load_weights(
         f'{zl_path}/{animals_fruits}/{model_name}_best.h5', by_name=True)
-    lr = lr * 0.2
     model_path = f'{model_name}_random_eraser.h5'
     print(f' Fine tune {model_name} with batch size: {batch_size}: \n')
+    optimizer = 'SGD'
+    lr = 1e-4
+    lr = lr * batch_size / 32
+    # lr = lr * 0.2
+    opt = SGD(lr=lr, momentum=0.9, decay=1e-6, nesterov=True)
 
 else:
     print(f"\n Train {model_name} with batch size: {batch_size}\n")
     optimizer = 'Adam'
     lr = 0.001
     opt = 'adam'
+
 
 print(" Optimizer: " + optimizer + " lr: " + str(lr) + " \n")
 model.compile(
@@ -233,17 +212,10 @@ model.compile(
 
 # datagen and val_datagen
 datagen = ImageDataGenerator(
-<<<<<<< HEAD
     # preprocessing_function=preprocess_input,
-    # preprocessing_function=get_random_eraser(
-    #     p=0.2, v_l=0, v_h=1, pixel_level=True),  # 0.1-0.4
     rescale=1. / 255,
-=======
-    preprocessing_function=preprocess_input,
     # preprocessing_function=get_random_eraser(
     #     p=0.2, v_l=0, v_h=1, pixel_level=True),  # 0.1-0.4
-    # rescale=1. / 255,
->>>>>>> dcbc0cbe647a4dce94b5eb2601e215466d7f0a79
     rotation_range=40,  # 10-30
     width_shift_range=0.2,  # 0.1-0.3
     height_shift_range=0.2,  # 0.1-0.3
@@ -251,13 +223,8 @@ datagen = ImageDataGenerator(
     zoom_range=0.2,  # 0.1-0.3
     horizontal_flip=True,
     fill_mode='nearest')
-<<<<<<< HEAD
 # val_datagen = ImageDataGenerator(preprocessing_function=preprocess_input)
 val_datagen = ImageDataGenerator(rescale=1. / 255)
-=======
-val_datagen = ImageDataGenerator(preprocessing_function=preprocess_input)
-# val_datagen = ImageDataGenerator(rescale=1. / 255)
->>>>>>> dcbc0cbe647a4dce94b5eb2601e215466d7f0a79
 
 # callbacks
 early_stopping = EarlyStopping(

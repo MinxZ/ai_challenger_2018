@@ -9,7 +9,7 @@ width = 299
 zl_path = '/data/zl'
 animals_fruits = 'fruits'
 
-model = load_model(f'{zl_path}/fruits_test/Xception_best.h5')
+model = load_model(f'{zl_path}/fruits_test/Xception_fc.h5')
 train_test = 'test'
 X = np.load(f'{zl_path}/{animals_fruits}/x_{train_test}.npy')
 X = X / 127.5 - 1

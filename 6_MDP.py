@@ -50,7 +50,7 @@ def attrstr2list(s):
 
 zl_path = '/data/zl'
 path = f'{zl_path}/ai_challenger_zsl2018_train_test_a_20180321'
-superclasses = ['Animals', 'Fruits']
+superclasses = ['Fruits']
 dim = 256
 
 # Write prediction
@@ -115,8 +115,7 @@ for superclass in superclasses:
     # Calculate prototypes (cluster centers)
     # features_test = features_test / np.max(abs(features_train))
     # features_train = features_train / np.max(abs(features_train))
-    features_test = features_test
-    features_train = features_train
+
     dim_f = features_train.shape[1]
     prototypes_train = np.ndarray((int(classNum / 5 * 4), dim_f))
 

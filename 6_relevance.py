@@ -50,7 +50,6 @@ def attrstr2list(s):
 
 zl_path = '/data/zl'
 path = f'{zl_path}/ai_challenger_zsl2018_train_test_a_20180321'
-superclasses = ['Animals', 'Fruits']
 superclasses = ['Animals']
 dim = 256
 
@@ -117,8 +116,7 @@ for superclass in superclasses:
     # Calculate prototypes (cluster centers)
     # features_test = features_test / np.max(abs(features_train))
     # features_train = features_train / np.max(abs(features_train))
-    features_test = features_test
-    features_train = features_train
+
     dim_f = features_train.shape[1]
     prototypes_train = np.ndarray((int(classNum / 5 * 4), dim_f))
 
@@ -139,20 +137,24 @@ for superclass in superclasses:
 # length(prototypes_train - prototypes_train[::-1]) * mask -  = length(attributes_train - attributes_train[::-1])
 
     # Structure learning
-    LASSO = models.Lasso(alpha=0.01)
+    LASSO = models.Lasso(alpha=0.01, max_iter=10000)
     LASSO.fit(attributes_train, prototypes_train)
     W = LASSO.coef_
     w_sum = W.sum(axis=0)
 
-    attributes_test *= np.absolute(w_sum)
-    attributes_train *= np.absolute(w_sum)
+    # attributes_test *= np.absolute(w_sum)
+    # attributes_train *= np.absolute(w_sum)
+    attributes_test *= w_sum
+    attributes_train *= w_sum
+
     # threshold = 0
     # attributes_test *= np.where(w_sum != threshold, 1, 0)
     # attributes_train *= np.where(w_sum != threshold, 1, 0)
 
     # Structure learning
-    LASSO = models.Lasso(alpha=0.01)
-    LASSO.fit(attributes_train.transpose(), attributes_test.transpose())
+    LASSO = models.Lasso(alpha=0.01, max_iter=10000)
+    LASSO.fit(attributes_train.transpose(),
+              attributes_test.transpose())
     W = LASSO.coef_
 
     # Image prototype synthesis
