@@ -92,6 +92,15 @@ fine_tune = False
 # fine_tune = True
 
 
+<<<<<<< HEAD
+=======
+if use_imagenet or fine_tune is True:
+    optimizer = 'SGD'
+    lr = 1e-4
+    lr = lr * batch_size / 32
+    opt = SGD(lr=lr, momentum=0.9, decay=1e-6, nesterov=True)
+
+>>>>>>> e175d16ce9cdbf3714812d18158c6e86fbad4b59
 reduce_lr_patience = 5
 patience = 10  # reduce_lr_patience+1* + 1
 print(
@@ -214,8 +223,11 @@ model.compile(
 datagen = ImageDataGenerator(
     # preprocessing_function=preprocess_input,
     rescale=1. / 255,
+<<<<<<< HEAD
     # preprocessing_function=get_random_eraser(
     #     p=0.2, v_l=0, v_h=1, pixel_level=True),  # 0.1-0.4
+=======
+>>>>>>> e175d16ce9cdbf3714812d18158c6e86fbad4b59
     rotation_range=40,  # 10-30
     width_shift_range=0.2,  # 0.1-0.3
     height_shift_range=0.2,  # 0.1-0.3
