@@ -29,6 +29,7 @@ model = Model(inputs=inputs, outputs=x)
 
 animals_fruits = 'animals'
 for animals_fruits in ['animals', 'fruits']:
+    # model = load_model(f'{zl_path}/{animals_fruits}/{model_name}.h5')
     model.load_weights(
         f'{zl_path}/{animals_fruits}/{model_name}.h5', by_name=True)
     print(f'\n {animals_fruits}: ')
@@ -40,4 +41,4 @@ for animals_fruits in ['animals', 'fruits']:
             data_path = f'{zl_path}/{animals_fruits}/X.npy'
         X = np.load(data_path)
         features = model.predict(X, batch_size=batch_size, verbose=1)
-        np.save(f'{zl_path}/{animals_fruits}/features_{train_test}', features)
+        np.save(f'{zl_path}/{animals_fruits}/features_{train_test}_256', features)

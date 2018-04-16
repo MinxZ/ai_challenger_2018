@@ -169,10 +169,6 @@ for superclass in superclasses:
     class_index = np.load(
         f'{zl_path}/{animals_fruits}/class_a.npy').item()
 
-    # Calculate prototypes (cluster centers)
-    # features_test = features_test / np.max(abs(features_train))
-    # features_train = features_train / np.max(abs(features_train))
-
     dim_f = features_train.shape[1]
     prototypes_train = np.ndarray((int(classNum / 5 * 4), dim_f))
 

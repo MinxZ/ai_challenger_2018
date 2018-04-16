@@ -1,45 +1,16 @@
-#!/usr/bin/env python
-# coding=utf-8
-# Copyright 2018 challenger.ai
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-"""
-Baseline codes for zero-shot learning task.
-This python script is the baseline to implement zero-shot learning on each super-class.
-The command is:     python MDP.py Animals
-The only parameter is the super-class name.
-This method is from the paper
-@inproceedings{zhao2017zero,
-  title={Zero-shot learning posed as a missing data problem},
-  author={Zhao, Bo and Wu, Botong and Wu, Tianfu and Wang, Yizhou},
-  booktitle={Proceedings of ICCV Workshop},
-  pages={2616--2622},
-  year={2017}
-}
-Cite the paper, if you use this code.
-"""
-
 from __future__ import absolute_import, division, print_function
 
 import os
 
-import matplotlib.pyplot as plt
 import numpy as np
 import sklearn.linear_model as models
-from sklearn import datasets
-from sklearn.mixture import GaussianMixture
-from sklearn.model_selection import StratifiedKFold
+
+
+def compute_distances(X, Y):
+    dists = -2 * np.dot(X, Y.T) + \
+        np.sum(X**2, axis=1)[:, np.newaxis] + \
+        np.sum(Y.T**2, axis=1)[:, np.newaxis]
+    return dists
 
 
 def _load_data(submit_file, reference_file):
@@ -114,6 +85,7 @@ superclasses = ['Animals', 'Fruits']
 dim = 256
 
 # Write prediction
+result_all = []
 fpred_all = open(f'{zl_path}/pred_all.txt', 'w')
 for superclass in superclasses:
     fpred = open(f'{zl_path}/pred_{superclass}.txt', 'w')
@@ -172,10 +144,6 @@ for superclass in superclasses:
     class_index = np.load(
         f'{zl_path}/{animals_fruits}/class_a.npy').item()
 
-    # Calculate prototypes (cluster centers)
-    # features_test = features_test / np.max(abs(features_train))
-    # features_train = features_train / np.max(abs(features_train))
-
     dim_f = features_train.shape[1]
     prototypes_train = np.ndarray((int(classNum / 5 * 4), dim_f))
 
@@ -193,27 +161,38 @@ for superclass in superclasses:
         label = list_test[i]
         attributes_test[i, :] = np.asarray(attributes[label])
 
+    if animals_fruits == 'animals':
+        LASSO = models.Lasso(alpha=0.01, max_iter=10000)
+
+        LASSO.fit(attributes_train, prototypes_train)
+        W = LASSO.coef_
+        w_sum = W.sum(axis=0)
+
+        attributes_test *= w_sum
+        attributes_train *= w_sum
+
     # Structure learning
-    LASSO = models.Lasso(alpha=0.01)
+    LASSO = models.Lasso(alpha=0.01, max_iter=10000)
     LASSO.fit(attributes_train.transpose(), attributes_test.transpose())
     W = LASSO.coef_
+
     # Image prototype synthesis
     prototypes_test = (
         np.dot(prototypes_train.transpose(), W.transpose())).transpose()
-    n_class = prototypes_test.shape[0]
 
-    # EM
-    estimator = GaussianMixture(
-        n_components=10, covariance_type='tied', max_iter=100, random_state=0, reg_covar=1e-4)
-    estimator.means_init = prototypes_test
-    estimator.fit(features_test)
-    y_train_pred = estimator.predict(features_test)
+    candidate = []
+    dist = compute_distances(prototypes_test, features_test)
+    candidate = dist
 
+    # Prediction
     dir_path = f'{zl_path}/ai_challenger_zsl2018_train_test_a_20180321/zsl_a_{animals_fruits}_test_20180321'
     images_test = os.listdir(dir_path)
     prediction = list()
     for i in range(len(images_test)):
-        pos = y_train_pred[i]
+        temp = np.repeat(np.reshape(
+            (features_test[i, :]), (1, dim_f)), len(list_test), axis=0)
+        distance = np.sum((temp - prototypes_test)**2, axis=1)
+        pos = np.argmin(distance)
         prediction.append(list_test[pos])
 
     for i in range(len(images_test)):
@@ -223,6 +202,6 @@ for superclass in superclasses:
     result = _eval_result(f'pred_{superclass}.txt',
                           f'ans_{animals_fruits}_true.txt')
     print(result)
-
-
+    result_all.append(float(result['score']))
+print((result_all[0] * 1506 + result_all[1] * 4249) / (1506 + 4249))
 fpred_all.close()

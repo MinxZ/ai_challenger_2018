@@ -110,6 +110,7 @@ superclasses = ['Animals', 'Fruits']
 dim = 256
 
 # Write prediction
+result_all = []
 fpred_all = open(f'{zl_path}/pred_all.txt', 'w')
 for superclass in superclasses:
     fpred = open(f'{zl_path}/pred_{superclass}.txt', 'w')
@@ -227,4 +228,6 @@ for superclass in superclasses:
     result = _eval_result(f'pred_{superclass}.txt',
                           f'ans_{animals_fruits}_true.txt')
     print(result)
+    result_all.append(float(result['score']))
+print((result_all[0] * 1506 + result_all[1] * 4249) / (1506 + 4406))
 fpred_all.close()
