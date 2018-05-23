@@ -105,6 +105,7 @@ def attrstr2list(s):
 
 
 zl_path = '/data/zl'
+zl_path = '/Users/z/zl'
 path = f'{zl_path}/ai_challenger_zsl2018_train_test_a_20180321'
 superclasses = ['Fruits']
 dim = 256
@@ -214,7 +215,7 @@ for superclass in superclasses:
         fpred.write(str(images_test[i]) + ' ' + prediction[i] + '\n')
         fpred_all.write(str(images_test[i]) + ' ' + prediction[i] + '\n')
     fpred.close()
-    result = _eval_result(f'pred_{superclass}.txt',
-                          f'ans_{animals_fruits}_true.txt')
+    result = _eval_result(f'{zl_path}/pred_{superclass}.txt',
+                          f'{zl_path}/ans_{animals_fruits}_true.txt')
     print(result)
 fpred_all.close()

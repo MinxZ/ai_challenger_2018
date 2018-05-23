@@ -38,7 +38,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import sklearn.linear_model as models
 from sklearn import datasets
-from sklearn.mixture import GaussianMixture
+from sklearn.mixture import BayesianGaussianMixture, GaussianMixture
 from sklearn.model_selection import StratifiedKFold
 
 
@@ -203,8 +203,8 @@ for superclass in superclasses:
     n_class = prototypes_test.shape[0]
 
     # EM
-    estimator = GaussianMixture(
-        n_components=10, covariance_type='tied', max_iter=100, random_state=0, reg_covar=1e-4)
+    estimator = BayesianGaussianMixture(
+        n_components=10, covariance_type='tied', max_iter=1, random_state=0, reg_covar=1e-4)
     estimator.means_init = prototypes_test
     estimator.fit(features_test)
     y_train_pred = estimator.predict(features_test)

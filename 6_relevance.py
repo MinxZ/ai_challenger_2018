@@ -105,6 +105,7 @@ def attrstr2list(s):
 
 
 zl_path = '/data/zl'
+zl_path = '/Users/z/zl'
 path = f'{zl_path}/ai_challenger_zsl2018_train_test_a_20180321'
 superclasses = ['Animals']
 dim = 256
@@ -112,7 +113,6 @@ dim = 256
 # Write prediction
 fpred_all = open(f'{zl_path}/pred_all.txt', 'w')
 for superclass in superclasses:
-
     fpred = open(f'{zl_path}/pred_{superclass}.txt', 'w')
     animals_fruits = str(superclass).lower()
     # The constants
@@ -207,8 +207,13 @@ for superclass in superclasses:
 
     # Prediction
 
-    dir_path = f'{zl_path}/ai_challenger_zsl2018_train_test_a_20180321/zsl_a_{animals_fruits}_test_20180321'
-    images_test = os.listdir(dir_path)
+    try:
+        images_test = np.load(f'{zl_path}/{animals_fruits}/images_test.npy')
+    except:
+        dir_path = f'{zl_path}/ai_challenger_zsl2018_train_test_a_20180321/zsl_a_{animals_fruits}_test_20180321'
+        images_test = os.listdir(dir_path)
+        np.save(f'{zl_path}/{animals_fruits}/images_test', images_test)
+
     prediction = list()
     for i in range(len(images_test)):
         temp = np.repeat(np.reshape(
@@ -221,7 +226,7 @@ for superclass in superclasses:
         fpred.write(str(images_test[i]) + ' ' + prediction[i] + '\n')
         fpred_all.write(str(images_test[i]) + ' ' + prediction[i] + '\n')
     fpred.close()
-    result = _eval_result(f'pred_{superclass}.txt',
-                          f'ans_{animals_fruits}_true.txt')
+    result = _eval_result(f'{zl_path}/pred_{superclass}.txt',
+                          f'{zl_path}/ans_{animals_fruits}_true.txt')
     print(result)
 fpred_all.close()
